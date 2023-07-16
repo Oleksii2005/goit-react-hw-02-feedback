@@ -1,70 +1,59 @@
 import { Component } from 'react';
-import css from './Feedback/Feedback.module.css';
+import { FeedbackOptions } from '../components/FeedbackOptions /FeedbackOptions';
+import { Statistics } from './Statistics/Statistics';
+import { Section } from './Section/Section';
+
 class App extends Component {
   state = {
     good: 0,
     neutral: 0,
     bad: 0,
   };
-  goodBtnHandleClick = () => {
-    this.setState(prevState => {
-      return {
-        good: prevState.good + 1,
-      };
-    });
+
+  onLeaveFeedback = type => {
+    this.setState(prevState => ({
+      [type]: prevState[type] + 1,
+    }));
   };
-  neutralBtnHandleClick = () => {
-    this.setState(prevState => {
-      return {
-        neutral: prevState.neutral + 1,
-      };
-    });
+
+  countTotalFeedback = () => {
+    const { good, neutral, bad } = this.state;
+    return good + neutral + bad;
   };
-  badBtnHandleClick = () => {
-    this.setState(prevState => {
-      return {
-        bad: prevState.bad + 1,
-      };
-    });
+
+  countPositiveFeedbackPercentage = () => {
+    const total = this.countTotalFeedback();
+    const { good } = this.state;
+    return total > 0 ? Math.round((good / total) * 100) : 0;
   };
+
   render() {
+    const totalFeedback = this.countTotalFeedback();
+
     return (
-      <div className="container">
-        <div className="feedback">
-          <h2>Please leave feedback</h2>
-          <div className="feedback_btns">
-            <button
-              type="button"
-              className={`${css.btn} ${css.btn_good}`}
-              onClick={this.goodBtnHandleClick}
-            >
-              Good
-            </button>
-            <button
-              type="button"
-              className={`${css.btn} ${css.btn_neutral}`}
-              onClick={this.neutralBtnHandleClick}
-            >
-              Neutral
-            </button>
-            <button
-              type="button"
-              className={`${css.btn} ${css.btn_bad}`}
-              onClick={this.badBtnHandleClick}
-            >
-              Bad
-            </button>
-          </div>
-        </div>
-        <div className="statistics">
-          <div className="statistics_options">
-            <p>Good:{this.state.good}</p>
-            <p>Neutral:{this.state.neutral}</p>
-            <p>Bad:{this.state.bad}</p>
-            <p>Total:</p>
-            <p>Positive feedback:</p>
-          </div>
-        </div>
+      <div>
+        <Section title="Please leave your feedback">
+          <FeedbackOptions
+            options={['good', 'neutral', 'bad']}
+            onLeaveFeedback={this.onLeaveFeedback}
+          />
+        </Section>
+
+        {totalFeedback > 0 ? (
+          <Section title="Statistics">
+            <Statistics
+              good={this.state.good}
+              neutral={this.state.neutral}
+              bad={this.state.bad}
+              total={totalFeedback}
+              positivePercentage={this.countPositiveFeedbackPercentage()}
+            />
+          </Section>
+        ) : (
+          <Section title="Statistics">
+            <p>There is no feedback yet.</p>
+          </Section>
+        )}
       </div>
     );
   }
